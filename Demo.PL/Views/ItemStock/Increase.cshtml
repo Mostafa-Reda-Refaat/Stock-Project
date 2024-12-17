@@ -1,0 +1,80 @@
+﻿@model ItemStockViewModel
+@{
+    ViewData["Title"] = "Increase";
+
+    var Items = new SelectList(ViewBag.Itemes, "Id", "Name");
+    var Stores = new SelectList(ViewBag.Stores, "Id", "Name");
+
+}
+
+<h1>Increase</h1>
+
+<div class="row">
+    <div class="col-6">
+        <form asp-action="Increase" method="post">
+
+            <div class="form-group">
+                <label class="col-form-label">Item</label>
+                <select id="itemDropdown" asp-for="@Model.ItemId" asp-items="Items" class="form-control">
+                    <option>--- Select Department ---</option>
+                </select>
+                <span asp-validation-for="@Model.ItemId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="col-form-label">Store</label>
+                <select id="storeDropdown" asp-for="@Model.StoreId" asp-items="Stores" class="form-control">
+                    <option>--- Select Department ---</option>
+                </select>
+                <span asp-validation-for="@Model.StoreId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="col-form-label">Current Quantity</label>
+                <span id="currentQuantity" >@Model.Quantity</span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="@Model.Quantity" class="col-form-label"></label>
+                <input asp-for="@Model.Quantity" value="@Model.Quantity" type="number" class="form-control" />
+                <span asp-validation-for="@Model.Quantity" class="text-danger"></span>
+            </div>
+
+            <br />
+            <input type="submit" value="Add" class="btn btn-primary" />
+
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function fetchQuantity() {
+                var storeId = $("#storeDropdown").val();
+                var itemId = $("#itemDropdown").val();
+
+                if (storeId && itemId) {
+                    $.ajax({
+                        url: '@Url.Action("GetQuantity", "ItemStock")',
+                        type: 'GET',
+                        data: { storeId: storeId, itemId: itemId },
+                        success: function (data) {
+                            $("#currentQuantity").text(data.quantity);
+                        },
+                        error: function () {
+                            $("#currentQuantity").text("Error fetching quantity");
+                        }
+                    });
+                } else {
+                    $("#currentQuantity").text("-");
+                }
+            }
+
+            $("#storeDropdown, #itemDropdown").change(fetchQuantity);
+        });
+    </script>
+    }
